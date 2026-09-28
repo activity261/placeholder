@@ -10,6 +10,9 @@ do
         -- using nerd font
         vim.g.have_nerd_font = true
 
+        -- don't inherit colors from terminal
+        vim.o.termguicolors = false
+
         -- enable line number + relative line number
         vim.o.number = true
         vim.o.relativenumber = true
@@ -60,10 +63,11 @@ end
 do
         -- Install Packages
         vim.pack.add({
-                "https://github.com/joshdick/onedark.vim.git",
+                "https://github.com/navarasu/onedark.nvim.git",
                 "https://github.com/cocopon/iceberg.vim.git",
                 "https://github.com/nvim-mini/mini.icons.git",
                 "https://github.com/nvim-tree/nvim-web-devicons.git",
+                "https://github.com/nvim-lualine/lualine.nvim",
                 "https://github.com/nvim-mini/mini.pairs.git",
                 "https://github.com/nvim-mini/mini.comment",
                 "https://github.com/NMAC427/guess-indent.nvim.git",
@@ -74,6 +78,7 @@ do
                         src = "https://github.com/saghen/blink.cmp.git",
                         version = "1.*",
                 },
+                "https://github.com/j-morano/buffer_manager.nvim.git",
                 "https://github.com/stevearc/oil.nvim",
                 "https://github.com/nvim-lua/plenary.nvim",
                 "https://github.com/nvim-telescope/telescope.nvim.git",
@@ -89,6 +94,17 @@ do
         })
 
         -- Setup Packages
+        require("onedark").setup({
+                style = "dark",
+        })
+        require("onedark").load()
+        require("lualine").setup({
+                options = {
+                        -- Disable angled separators
+                        component_separators = "",
+                        section_separators = "",
+                },
+        })
         require("mini.pairs").setup()
         require("mini.comment").setup()
         require("guess-indent").setup()
@@ -129,6 +145,7 @@ do
         require("blink.cmp").setup({
                 keymap = { preset = "super-tab" },
         })
+        require("buffer_manager").setup({})
         require("oil").setup({
                 view_options = {
                         show_hidden = true,
@@ -156,51 +173,105 @@ do
         })
 end
 
--- colorscheme
-do
-        vim.cmd("colorscheme onedark")
-end
-
 -- Keymaps
 do
-        -- Basic
-        vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
-        vim.keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "[b]uffer [d]elete" })
+        local map = vim.keymap.set
+
+        -- General keymaps
+        map("n", "<Esc>", "<cmd>nohlsearch<CR>")
+
+        -- Buffer
+        local bmui = require("buffer_manager.ui")
+        map({ "t", "n" }, "<leader>bm", bmui.toggle_quick_menu, { desc = "[b]uffer [m]anager", noremap = true })
+        map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "[b]uffer [d]elete" })
 
         -- Oil
-        vim.keymap.set("n", "<leader>fd", "<cmd>Oil<CR>", { desc = "[f]ind [d]irectory" })
+        map("n", "<leader>fd", "<cmd>Oil<CR>", { desc = "[f]ind [d]irectory" })
 
         -- Telescope builtins
         local builtin = require("telescope.builtin")
-        vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "[f]ind [b]uffers" })
-        vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "[f]ind [f]iles" })
-        vim.keymap.set("n", "<leader>fg", builtin.git_files, { desc = "[f]ind [g]it files" })
-        vim.keymap.set("n", "<leader>fp", builtin.live_grep, { desc = "[f]ind ripgre[p]" })
-        vim.keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<CR>", { desc = "[f]ind [t]odo" })
-        vim.keymap.set("n", "<leader>fw", builtin.lsp_workspace_symbols, { desc = "[f]ind [w]orkspace symbols" })
-        vim.keymap.set("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "[f]ind document [s]ymbols" })
-        vim.keymap.set("n", "<leader>fr", builtin.lsp_references, { desc = "[f]ind [r]eferences" })
+        map("n", "<leader>fb", builtin.buffers, { desc = "[f]ind [b]uffers" })
+        map("n", "<leader>ff", builtin.find_files, { desc = "[f]ind [f]iles" })
+        map("n", "<leader>fg", builtin.git_files, { desc = "[f]ind [g]it files" })
+        map("n", "<leader>fp", builtin.live_grep, { desc = "[f]ind ripgre[p]" })
+        map("n", "<leader>ft", "<cmd>TodoTelescope<CR>", { desc = "[f]ind [t]odo" })
+        map("n", "<leader>fw", builtin.lsp_workspace_symbols, { desc = "[f]ind [w]orkspace symbols" })
+        map("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "[f]ind document [s]ymbols" })
+        map("n", "<leader>fr", builtin.lsp_references, { desc = "[f]ind [r]eferences" })
 
         -- Go To
-        vim.keymap.set("n", "<leader>gtd", builtin.lsp_definitions, { desc = "[g]o [t]o [d]efinitions" })
-        vim.keymap.set("n", "<leader>gtt", builtin.lsp_type_definitions, { desc = "[g]o [t]o [t]ype definitions" })
-        vim.keymap.set("n", "<leader>gti", builtin.lsp_implementations, { desc = "[g]o [t]o [i]mplementations" })
+        map("n", "<leader>gd", builtin.lsp_definitions, { desc = "[g]o to [d]efinitions" })
+        map("n", "<leader>gt", builtin.lsp_type_definitions, { desc = "[g]o to [t]ype definitions" })
+        map("n", "<leader>gi", builtin.lsp_implementations, { desc = "[g]o to [i]mplementations" })
 
         -- Code
         local buf = require("vim.lsp.buf")
-        vim.keymap.set("n", "<leader>ch", buf.hover, { desc = "[c]ode [h]over" })
-        vim.keymap.set("n", "<leader>ca", buf.code_action, { desc = "[c]ode [a]ction" })
-        vim.keymap.set("n", "<leader>cf", buf.format, { desc = "[c]ode [f]ormat" })
-        vim.keymap.set("n", "<leader>cr", buf.rename, { desc = "[c]ode [r]ename" })
-        vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "[c]ode [d]iagnostic" })
+        map("n", "<leader>ca", buf.code_action, { desc = "[c]ode [a]ction" })
+        map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "[c]ode [d]iagnostic" })
+        map("n", "<leader>cf", buf.format, { desc = "[c]ode [f]ormat" })
+        map("n", "<leader>ch", function()
+                buf.hover({ border = "rounded" })
+        end, { desc = "[c]ode [h]over" })
+        map("n", "<leader>ci", function()
+                local current = vim.lsp.inlay_hint.is_enabled({ bufnr = 0 })
+                vim.lsp.inlay_hint.enable(not current, { bufnr = 0 })
+        end, { desc = "[code] [i]nlay hints" })
+        map("n", "<leader>cl", function()
+                local codelens = vim.lsp.codelens
+                codelens.enable(not codelens.is_enabled())
+                if codelens.is_enabled() then
+                        print("codelens activated")
+                else
+                        print("codelens deactivated")
+                end
+                vim.defer_fn(function()
+                        -- Clear the current message by echoing a space or empty string
+                        -- The 'silent' flag prevents the clear action from being logged
+                        vim.api.nvim_echo({ { " ", "None" } }, false, {})
+                end, 1000)
+        end, { desc = "[c]ode[l]ens toggle" })
+        map("n", "<leader>cr", buf.rename, { desc = "[c]ode [r]ename" })
 
-        -- Which-Key
+        -- Misc
+        map("n", "<leader>l", "<cmd>LazyGit<CR>", { desc = "lazygit" })
+        map("n", "<leader>j", function()
+                local width = math.floor(vim.o.columns * 0.8)
+                local height = math.floor(vim.o.lines * 0.8)
+
+                local create_buf = vim.api.nvim_create_buf(false, true)
+
+                local win = vim.api.nvim_open_win(create_buf, true, {
+                        relative = "editor",
+                        width = width,
+                        height = height,
+                        col = math.floor((vim.o.columns - width) / 2),
+                        row = math.floor((vim.o.lines - height) / 2),
+                        style = "minimal",
+                        border = "rounded",
+                })
+                vim.fn.jobstart("jjui", {
+                        term = true,
+                        on_exit = function()
+                                vim.schedule(function()
+                                        if vim.api.nvim_win_is_valid(win) then
+                                                vim.api.nvim_win_close(win, true)
+                                        end
+
+                                        if vim.api.nvim_buf_is_valid(create_buf) then
+                                                vim.api.nvim_buf_delete(create_buf, { force = true })
+                                        end
+                                end)
+                        end,
+                })
+                vim.cmd("startinsert")
+        end, { desc = "jjui" })
+
+        -- WhichKey Groups
         local wk = require("which-key")
         wk.add({
                 { "<leader>b", group = "buffers" },
                 { "<leader>f", group = "find" },
-                { "<leader>g", group = "go" },
-                { "<leader>gt", group = "to" },
+                { "<leader>g", group = "go to" },
                 { "<leader>c", group = "code" },
         })
 end
