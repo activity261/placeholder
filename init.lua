@@ -122,8 +122,6 @@ do
                         csharp = { "csharpier" },
                         go = { "gofmt" },
                         sql = { "sqlfluff" },
-                        pgsql = { "sqlfluff" },
-                        sqlite3 = { "sqlfluff" },
                         sh = { "shfmt" },
                 },
                 formatters = {
