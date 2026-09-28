@@ -107,7 +107,7 @@ do
         })
         require("mini.pairs").setup()
         require("mini.comment").setup()
-        require("guess-indent").setup()
+        require("guess-indent").setup({})
         require("gitsigns").setup()
         require("todo-comments").setup()
         require("conform").setup({
@@ -150,6 +150,29 @@ do
                 view_options = {
                         show_hidden = true,
                 },
+                keymaps = {
+                        ["q"] = { "actions.close", mode = "n" },
+                },
+                float = {
+                        -- Padding around the floating window
+                        padding = 2,
+                        -- max_width and max_height can be integers or a float between 0 and 1 (e.g. 0.4 for 40%)
+                        max_width = math.floor(vim.o.columns * 0.5),
+                        max_height = math.floor(vim.o.lines * 0.5),
+                        border = "rounded",
+                        win_options = {
+                                winblend = 0,
+                        },
+                        -- optionally override the oil buffers window title with custom function: fun(winid: integer): string
+                        get_win_title = nil,
+                        -- preview_split: Split direction: "auto", "left", "right", "above", "below".
+                        preview_split = "auto",
+                        -- This is the config that will be passed to nvim_open_win.
+                        -- Change values here to customize the layout
+                        override = function(conf)
+                                return conf
+                        end,
+                },
         })
         require("telescope").setup()
         require("which-key").setup({
@@ -186,7 +209,7 @@ do
         map("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "[b]uffer [d]elete" })
 
         -- Oil
-        map("n", "<leader>fd", "<cmd>Oil<CR>", { desc = "[f]ind [d]irectory" })
+        map("n", "<leader>fd", "<cmd>Oil --float<CR>", { desc = "[f]ind [d]irectory" })
 
         -- Telescope builtins
         local builtin = require("telescope.builtin")
@@ -211,7 +234,7 @@ do
         map("n", "<leader>cf", buf.format, { desc = "[c]ode [f]ormat" })
         map("n", "<leader>ch", function()
                 buf.hover({ border = "rounded" })
-        end, { desc = "[c]ode [h]over" })
+        end, { desc = "[c]ode [h]over tooltips" })
         map("n", "<leader>ci", function()
                 local current = vim.lsp.inlay_hint.is_enabled({ bufnr = 0 })
                 vim.lsp.inlay_hint.enable(not current, { bufnr = 0 })
