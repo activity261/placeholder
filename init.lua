@@ -113,7 +113,7 @@ do
         require("conform").setup({
                 formatters_by_ft = {
                         lua = { "stylua" },
-                        python = { "ruff_organize_imports", "ruff_format" },
+                        python = { "ruff_fix", "ruff_format", "ruff_organize_imports" },
                         rust = { "rustfmt" },
                         javascript = { "oxfmt", "oxlint" },
                         javascriptreact = { "oxfmt", "oxlint" },
@@ -227,9 +227,10 @@ do
 
         -- Code
         local buf = require("vim.lsp.buf")
+        local conform = require("conform")
         map("n", "<leader>ca", buf.code_action, { desc = "[c]ode [a]ction" })
         map("n", "<leader>cd", vim.diagnostic.open_float, { desc = "[c]ode [d]iagnostic" })
-        map("n", "<leader>cf", buf.format, { desc = "[c]ode [f]ormat" })
+        map("n", "<leader>cf", conform.format, { desc = "[c]ode [f]ormat" })
         map("n", "<leader>ch", function()
                 buf.hover({ border = "rounded" })
         end, { desc = "[c]ode [h]over tooltips" })
@@ -300,7 +301,16 @@ end
 -- Treesitter
 do
         vim.api.nvim_create_autocmd("FileType", {
-                pattern = { "<filetype>" },
+                pattern = {
+                        "lua",
+                        "javascript",
+                        "typescript",
+                        "c_sharp",
+                        "python",
+                        "go",
+                        "rust",
+                        "fsharp",
+                },
                 callback = function()
                         vim.treesitter.start()
                 end,
@@ -388,6 +398,13 @@ do
                 },
         })
         lsp.enable("basedpyright")
+
+        lsp.config("ruff", {
+                cmd = { "ruff", "server" },
+                filetypes = { "python" },
+                root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", ".git" },
+        })
+        lsp.enable("ruff")
 
         -- Go
         lsp.config("gopls", {
