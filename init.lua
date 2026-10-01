@@ -70,6 +70,7 @@ do
                 "https://github.com/nvim-lualine/lualine.nvim",
                 "https://github.com/nvim-mini/mini.pairs.git",
                 "https://github.com/nvim-mini/mini.comment",
+                "https://github.com/nvim-mini/mini.surround",
                 "https://github.com/NMAC427/guess-indent.nvim.git",
                 "https://github.com/lewis6991/gitsigns.nvim.git",
                 "https://github.com/folke/todo-comments.nvim.git",
@@ -107,6 +108,19 @@ do
         })
         require("mini.pairs").setup()
         require("mini.comment").setup()
+        require("mini.surround").setup({
+                mappings = {
+                        add = "<leader>sa", -- Add surrounding in Normal and Visual modes
+                        delete = "<leader>sd", -- Delete surrounding
+                        find = "<leader>sf", -- Find surrounding (to the right)
+                        find_left = "<leader>sF", -- Find surrounding (to the left)
+                        highlight = "<leader>sh", -- Highlight surrounding
+                        replace = "<leader>sr", -- Replace surrounding
+
+                        suffix_last = "l", -- Suffix to search with "prev" method
+                        suffix_next = "n", -- Suffix to search with "next" method
+                },
+        })
         require("guess-indent").setup({})
         require("gitsigns").setup()
         require("todo-comments").setup()
@@ -295,6 +309,7 @@ do
                 { "<leader>f", group = "find" },
                 { "<leader>g", group = "go to" },
                 { "<leader>c", group = "code" },
+                { "<leader>s", group = "surround" },
         })
 end
 
