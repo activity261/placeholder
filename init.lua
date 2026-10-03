@@ -398,17 +398,39 @@ do
 	lsp.config("basedpyright", {
 		cmd = { "basedpyright-langserver", "--stdio" },
 		filetypes = { "python" },
-		root_markers = { "pyproject.toml", ".git" },
+		root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git" },
+		single_file_support = true,
 		settings = {
 			basedpyright = {
-				-- Using Ruff's import organizer
-				disableOrganizeImports = true,
-			},
-			python = {
 				analysis = {
-					-- Ignore all files for analysis to exclusively use Ruff for linting
+					-- Type checking mode: "off" | "basic" | "standard" | "strict" | "all"
 					typeCheckingMode = "standard",
+					-- Only show diagnostics for open files (faster)
+					diagnosticMode = "openFilesOnly",
+					-- Auto-detect venvs and search paths
+					autoSearchPaths = true,
+					-- Use library code for type inference
+					useLibraryCodeForTypes = true,
+					-- Enable auto-import completions
+					autoImportCompletions = true,
+					-- Inlay hints
+					inlayHints = {
+						enabled = true,
+						variableTypes = true,
+						functionReturnTypes = true,
+						callArgumentNames = "none",
+					},
+					-- Severity overrides to reduce noise
+					diagnosticSeverityOverrides = {
+						reportUnusedImport = "none", -- Ruff handles this (F401)
+						reportUnusedVariable = "warning",
+						reportUnknownMemberType = "none",
+						reportUnknownArgumentType = "none",
+						reportPrivateUsage = "none",
+					},
 				},
+				-- Let Ruff handle import organization
+				disableOrganizeImports = true,
 			},
 		},
 	})
@@ -418,20 +440,30 @@ do
 		cmd = { "ruff", "server" },
 		filetypes = { "python" },
 		root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", ".git" },
+		single_file_support = true,
+		init_options = {
+			settings = {
+				-- Linting
+				lint = {
+					enable = true,
+					fixAll = true,
+				},
+				-- Formatting
+				format = {
+					enable = true,
+					preview = true,
+				},
+				-- Organize imports on save
+				organizeImports = true,
+				-- Line length (override pyproject.toml if desired)
+				-- lineLength = 88,
+				-- Show syntax errors
+				showSyntaxErrors = true,
+			},
+		},
 		on_attach = function(client, bufnr)
-			-- Ruff should only provide formatting and diagnostics.
+			-- Disable hover — BasedPyright provides better hover
 			client.server_capabilities.hoverProvider = false
-			client.server_capabilities.completionProvider = nil
-			client.server_capabilities.definitionProvider = false
-			client.server_capabilities.declarationProvider = false
-			client.server_capabilities.typeDefinitionProvider = false
-			client.server_capabilities.implementationProvider = false
-			client.server_capabilities.referencesProvider = false
-			client.server_capabilities.documentSymbolProvider = false
-			client.server_capabilities.workspaceSymbolProvider = false
-			client.server_capabilities.signatureHelpProvider = nil
-			client.server_capabilities.renameProvider = false
-			client.server_capabilities.codeActionProvider = false
 		end,
 	})
 	lsp.enable("ruff")
